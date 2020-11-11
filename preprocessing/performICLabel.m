@@ -106,8 +106,17 @@ end
 
 
 %% Run ICA
-[~, EEG, ~] = evalc('pop_runica(EEG, ''icatype'',''runica'',''chanind'',EEG.icachansind)');
-    
+%[~, EEG, ~] = evalc('pop_runica(EEG, ''icatype'',''runica'',''chanind'',EEG.icachansind)');
+% [weights,sphere,mods] = runamica15(EEG.data,;
+%[EEG,~] = evalc('pop_runamica(EEG,')
+[W,S,mods] = evalc('runamica15(EEG.data(EEG.icachansind,:),''do_reject'',1,''max_threads'',16,''numprocs'',10)');
+
+EEG.icaweights = W;
+EEG.icasphere  = S(1:size(W,1),:);
+EEG.icawinv    = mods.A(:,:,1);
+EEG.mods       = mods;
+
+
 if EEG_orig.etc.keep_comps
     EEG_orig.etc.beforeICremove.icaact = EEG.icaact;
     EEG_orig.etc.beforeICremove.icawinv = EEG.icawinv;
