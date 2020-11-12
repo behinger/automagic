@@ -108,8 +108,21 @@ end
 %% Run ICA
 %[~, EEG, ~] = evalc('pop_runica(EEG, ''icatype'',''runica'',''chanind'',EEG.icachansind)');
 % [weights,sphere,mods] = runamica15(EEG.data,;
-%[EEG,~] = evalc('pop_runamica(EEG,')
-[W,S,mods] = evalc('runamica15(EEG.data(EEG.icachansind,:),''do_reject'',1,''max_threads'',16,''numprocs'',10)');
+
+%[EEG,~] = pop_runamica(EEG,'do_reject',1,'max_threads',16,'numprocs',1)
+%[out,W,S,mods] = evalc('runamica15(EEG.data(EEG.icachansind,:),''do_reject'',1,''max_threads'',16,''numprocs'',10)');
+
+cd /bigpool/export/users/ehinger/tmp % write temp file locally not on server, should be faster
+
+outdir = ['amicatmp' num2str(round(rand(1)*100000)) ];
+while exist(outdir,'dir')
+    outdir = ['amicatmp' num2str(round(rand(1)*100000)) ];
+end
+
+[W,S,mods] = runamica15(EEG.data(:,:),'do_reject',1,'max_threads',1,'numprocs',1,'outdir',outdir);
+
+%delete(outdir)
+
 
 EEG.icaweights = W;
 EEG.icasphere  = S(1:size(W,1),:);
@@ -123,6 +136,7 @@ if EEG_orig.etc.keep_comps
     EEG_orig.etc.beforeICremove.icasphere = EEG.icasphere;
     EEG_orig.etc.beforeICremove.icaweights = EEG.icaweights;
     EEG_orig.etc.beforeICremove.chanlocs = EEG.chanlocs;
+    EEG_orig.etc.beforeICremove.mod = mods;
 end
     
 %% perform IClabel  
